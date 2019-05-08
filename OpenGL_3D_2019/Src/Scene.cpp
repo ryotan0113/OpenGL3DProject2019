@@ -90,3 +90,14 @@ bool Scene::IsVisible() const
 {
 	return isVisible;
 }
+
+/**
+* シーンスタックを取得する
+*
+* @return シーンスタック
+*/
+SceneStack& SceneStack::Instance()
+{
+	static SceneStack instance;
+	return instance;
+}
