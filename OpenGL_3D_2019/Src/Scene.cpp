@@ -101,3 +101,29 @@ SceneStack& SceneStack::Instance()
 	static SceneStack instance;
 	return instance;
 }
+
+/**
+* コンストラクタ
+*/
+SceneStack::SceneStack()
+{
+	stack.reserve(16);
+}
+
+/**
+* シーンをプッシュする
+*
+* @param p 新しいシーン
+*/
+void SceneStack::Push(ScenePtr p)
+{
+	if (!stack.empty())
+	{
+		Current().Stop();
+	}
+
+	stack.push_back(p);
+	std::cout << "[シーンプッシュ] " << p->Name() << "\n";
+	Current().Initialize();
+	Current().Play();
+}
