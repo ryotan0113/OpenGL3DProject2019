@@ -10,3 +10,4 @@
 void GameOverScene::ProcessInput()
 {
 	SceneStack::Instance().Replace(std::make_shared<TitleScene>());
+}
