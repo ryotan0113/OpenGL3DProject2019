@@ -20,6 +20,15 @@
     <ClCompile Include="Src\TitleScene.cpp">
       <Filter>Src</Filter>
     </ClCompile>
+    <ClCompile Include="Src\MainGameScene.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\StatusScene.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\GameOverScene.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Scene.h">
