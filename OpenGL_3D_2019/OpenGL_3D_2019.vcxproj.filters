@@ -17,6 +17,9 @@
     <ClCompile Include="Src\Scene.cpp">
       <Filter>Src</Filter>
     </ClCompile>
+    <ClCompile Include="Src\TitleScene.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Scene.h">

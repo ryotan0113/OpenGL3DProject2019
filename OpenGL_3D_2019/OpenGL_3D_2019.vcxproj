@@ -117,6 +117,7 @@
   <ItemGroup>
     <ClCompile Include="Src\Main.cpp" />
     <ClCompile Include="Src\Scene.cpp" />
+    <ClCompile Include="Src\TitleScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\GameOverScene.h" />
