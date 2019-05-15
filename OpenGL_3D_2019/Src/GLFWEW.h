@@ -20,13 +20,14 @@ public:
   bool ShouldClose() const;
   void SwapBuffers() const;
   const GamePad& GetGamePad() const;
-  void UpdateGamePad();
+
 
 private:
   Window()= default;
   ~Window();
   Window(const Window&) = delete;
   Window& operator=(const Window&) = delete;
+  void UpdateGamePad();
 
   bool isGLFWInitialized = false;
   bool isInitialized = false;
