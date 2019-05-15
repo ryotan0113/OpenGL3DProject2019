@@ -9,50 +9,30 @@
 
 namespace GLFWEW {
 
-	/**
-	* GLFWとGLEWのラッパークラス.
-	*/
-	class Window
-	{
-	public:
-		static Window& Instance();
-		bool Init(int w, int h, const char* title);
-		bool ShouldClose() const;
-		void SwapBuffers() const;
-		void Update();
+/**
+* GLFWとGLEWのラッパークラス.
+*/
+class Window
+{
+public:
+  static Window& Instance();
+  bool Init(int w, int h, const char* title);
+  bool ShouldClose() const;
+  void SwapBuffers() const;
+  const GamePad& GetGamePad() const;
+  void UpdateGamePad();
 
-		void InitTimer();
-		void UpdateTimer();
-		double DeltaTime() const;
+private:
+  Window()= default;
+  ~Window();
+  Window(const Window&) = delete;
+  Window& operator=(const Window&) = delete;
 
-        bool IsKeyDown(int key) const;
-        bool IsKeyPressed(int key) const;
-        int GetMouseButton(int button) const;
-
-		const GamePad& GetGamePad() const;
-
-	private:
-		Window();
-		~Window();
-		Window(const Window&) = delete;
-		Window& operator=(const Window&) = delete;
-		void UpdateGamePad();
-
-		bool isGLFWInitialized = false;
-		bool isInitialized = false;
-		GLFWwindow* window = nullptr;
-        double previousTime = 0;
-        double deltaTime = 0;
-		GamePad gamepad;
-
-        enum class KeyState : char {
-          release,
-          press1st,
-          press,
-        };
-
-        KeyState keyState[GLFW_KEY_LAST + 1];
-	};
+  bool isGLFWInitialized = false;
+  bool isInitialized = false;
+  GLFWwindow* window = nullptr;
+  GamePad gamepad;
+};
 
 } // namespace GLFWEW
 

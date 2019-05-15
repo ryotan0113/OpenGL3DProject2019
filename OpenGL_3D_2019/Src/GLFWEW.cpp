@@ -1,16 +1,11 @@
 /**
-* @file GLFWE.cpp
+* @file GLFWEW.cpp
 */
 #include "GLFWEW.h"
 #include <iostream>
 
 /// GLFWとGLEWをラップするための名前空間.
 namespace GLFWEW {
-
-void APIENTRY OutputGLDebugMessage(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, GLvoid *userParam)
-{
-  std::cerr << message << "\n";
-}
 
 /**
 * GLFWからのエラー報告を処理する.
@@ -20,7 +15,7 @@ void APIENTRY OutputGLDebugMessage(GLenum source, GLenum type, GLuint id, GLenum
 */
 void ErrorCallback(int error, const char* desc)
 {
-	std::cerr << "ERROR: " << desc << std::endl;
+  std::cerr << "ERROR: " << desc << std::endl;
 }
 
 /**
@@ -30,15 +25,8 @@ void ErrorCallback(int error, const char* desc)
 */
 Window& Window::Instance()
 {
-	static Window instance;
-	return instance;
-}
-
-/**
-* コンストラクタ.
-*/
-Window::Window()
-{
+  static Window instance;
+  return instance;
 }
 
 /**
@@ -46,9 +34,9 @@ Window::Window()
 */
 Window::~Window()
 {
-	if (isGLFWInitialized) {
-		glfwTerminate();
-	}
+  if (isGLFWInitialized) {
+    glfwTerminate();
+  }
 }
 
 /**
@@ -63,52 +51,48 @@ Window::~Window()
 */
 bool Window::Init(int w, int h, const char* title)
 {
-	if (isInitialized) {
-		std::cerr << "ERROR: GLFWEWは既に初期化されています." << std::endl;
-		return false;
-	}
-	if (!isGLFWInitialized) {
-		glfwSetErrorCallback(ErrorCallback);
-		if (glfwInit() != GL_TRUE) {
-			return false;
-		}
-        isGLFWInitialized = true;
-	}
-
-	if (!window) {
-        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
-		window = glfwCreateWindow(w, h, title, nullptr, nullptr);
-		if (!window) {
-			return false;
-		}
-		glfwMakeContextCurrent(window);
+  if (isInitialized) {
+    std::cerr << "ERROR: GLFWEWは既に初期化されています." << std::endl;
+    return false;
+  }
+  if (!isGLFWInitialized) {
+    glfwSetErrorCallback(ErrorCallback);
+    if (glfwInit() != GL_TRUE) {
+      return false;
     }
+    isGLFWInitialized = true;
+  }
 
-	if (glewInit() != GLEW_OK) {
-		std::cerr << "ERROR: GLEWの初期化に失敗しました." << std::endl;
-		return false;
-	}
+  if (!window) {
+    window = glfwCreateWindow(w, h, title, nullptr, nullptr);
+    if (!window) {
+      return false;
+    }
+    glfwMakeContextCurrent(window);
+  }
 
-    glDebugMessageCallback(OutputGLDebugMessage, nullptr);
+  if (glewInit() != GLEW_OK) {
+    std::cerr << "ERROR: GLEWの初期化に失敗しました." << std::endl;
+    return false;
+  }
 
-	const GLubyte* renderer = glGetString(GL_RENDERER);
-	std::cout << "Renderer: " << renderer << std::endl;
-	const GLubyte* version = glGetString(GL_VERSION);
-	std::cout << "Version: " << version << std::endl;
-
-    isInitialized = true;
-	return true;
+  const GLubyte* renderer = glGetString(GL_RENDERER);
+  std::cout << "Renderer: " << renderer << std::endl;
+  const GLubyte* version = glGetString(GL_VERSION);
+  std::cout << "Version: " << version << std::endl;
+  isInitialized = true;
+  return true;
 }
 
 /**
 * ウィンドウを閉じるべきか調べる.
 *
 * @retval true 閉じる.
-* @retval false 閉じない.
+* @retval false 閉じない. 
 */
 bool Window::ShouldClose() const
 {
-	return glfwWindowShouldClose(window) != 0;
+  return glfwWindowShouldClose(window) != 0;
 }
 
 /**
@@ -116,121 +100,119 @@ bool Window::ShouldClose() const
 */
 void Window::SwapBuffers() const
 {
-	glfwPollEvents();
-	glfwSwapBuffers(window);
+  glfwPollEvents();
+  glfwSwapBuffers(window);
 }
 
 /**
-* キーが押されているか調べる.
+* ゲームパッドの状態を取得する.
 *
-* @param key 調べるキーのID(GLFW_KEY_Aなど).
-*
-* @retval true  キーが押されている.
-* @retval false キーが押されていない.
+* @return ゲームパッドの状態.
 */
-bool Window::IsKeyPressed(int key) const
+const GamePad& Window::GetGamePad() const
 {
-  if (key < 0 || key >= GLFW_KEY_LAST + 1) {
-    return false;
-  }
-  return keyState[key] != KeyState::release;
+  return gamepad;
 }
 
 /**
-* キーが押された瞬間か調べる.
-*
-* @param key 調べるキーのID(GLFW_KEY_Aなど).
-*
-* @retval true  キーが押された瞬間.
-* @retval false キーが押された瞬間ではない.
+* ジョイスティックのアナログ入力装置ID.
++
+* @note XBOX360コントローラー基準.
 */
-bool Window::IsKeyDown(int key) const
-{
-  if (key < 0 || key >= GLFW_KEY_LAST + 1) {
-    return false;
-  }
-  return keyState[key] == KeyState::press1st;
-}
+enum GLFWAXESID {
+  GLFWAXESID_LeftX, ///< 左スティックのX軸.
+  GLFWAXESID_LeftY, ///< 左スティックのY軸.
+  GLFWAXESID_BackX, ///< アナログトリガー.
+  GLFWAXESID_RightY, ///< 右スティックのY軸.
+  GLFWAXESID_RightX, ///< 右スティックのX軸.
+};
 
 /**
-* タイマーを初期化する.
-*
-* @sa UpdateTimer, GetDeltaTime
+* ジョイスティックのデジタル入力装置ID.
++
+* @note XBOX360コントローラー基準.
 */
-void Window::InitTimer()
-{
-  glfwSetTime(0.0);
-  previousTime = 0.0;
-  deltaTime = 0.0;
-}
+enum GLFWBUTTONID {
+  GLFWBUTTONID_A, ///< Aボタン.
+  GLFWBUTTONID_B, ///< Bボタン.
+  GLFWBUTTONID_X, ///< Xボタン.
+  GLFWBUTTONID_Y, ///< Yボタン.
+  GLFWBUTTONID_L, ///< Lボタン.
+  GLFWBUTTONID_R, ///< Rボタン.
+  GLFWBUTTONID_Back, ///< Backボタン.
+  GLFWBUTTONID_Start, ///< Startボタン.
+  GLFWBUTTONID_LThumb, ///< 左スティックボタン.
+  GLFWBUTTONID_RThumb, ///< 右スティックボタン.
+  GLFWBUTTONID_Up, ///< 上キー.
+  GLFWBUTTONID_Right, ///< 右キー.
+  GLFWBUTTONID_Down, ///< 下キー.
+  GLFWBUTTONID_Left, ///< 左キー.
+};
 
 /**
-* タイマーを更新する.
-*
-* @sa InitTimer, GetDeltaTime
+* ゲームパッドの状態を更新する.
 */
-void Window::UpdateTimer()
+void Window::UpdateGamePad()
 {
-  // 経過時間を計測.
-  const double currentTime = glfwGetTime();
-  deltaTime = currentTime - previousTime;
-  previousTime = currentTime;
-
-  // 経過時間が長くなりすぎないように調整.
-  const float upperLimit = 0.25f; // 経過時間として許容される上限.
-  if (deltaTime > upperLimit) {
-    deltaTime = 0.1f;
-  }
-}
-
-/**
-* 経過時間を取得する.
-*
-* @return 直前の2回のUpdateTimer()呼び出しの間に経過した時間.
-*
-* @sa InitTimer, UpdateTimer
-*/
-double Window::DeltaTime() const
-{
-  return deltaTime;
-}
-
-/**
-* 状態を更新する.
-*/
-void Window::Update()
-{
-  UpdateTimer();
-  for (size_t i = 0; i < GLFW_KEY_LAST + 1; ++i) {
-    const bool pressed = glfwGetKey(window, i) == GLFW_PRESS;
-    if (pressed) {
-      if (keyState[i] == KeyState::release) {
-        keyState[i] = KeyState::press1st;
-      } else if (keyState[i] == KeyState::press1st) {
-        keyState[i] = KeyState::press;
+  const uint32_t prevButtons = gamepad.buttons;
+  int axesCount, buttonCount;
+  const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &axesCount);
+  const uint8_t* buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &buttonCount);
+  if (axes && buttons && axesCount >= 2 && buttonCount >= 8) {
+    gamepad.buttons &= ~(GamePad::DPAD_UP | GamePad::DPAD_DOWN | GamePad::DPAD_LEFT | GamePad::DPAD_RIGHT);
+    static const float threshould = 0.3f;
+    if (axes[GLFWAXESID_LeftY] >= threshould) {
+      gamepad.buttons |= GamePad::DPAD_UP;
+    } else if (axes[GLFWAXESID_LeftY] <= -threshould) {
+      gamepad.buttons |= GamePad::DPAD_DOWN;
+    }
+    if (axes[GLFWAXESID_LeftX] >= threshould) {
+      gamepad.buttons |= GamePad::DPAD_LEFT;
+    } else if (axes[GLFWAXESID_LeftX] <= -threshould) {
+      gamepad.buttons |= GamePad::DPAD_RIGHT;
+    }
+    static const struct {
+      int glfwCode;
+      uint32_t gamepadCode;
+    } keyMap[] = {
+      { GLFWBUTTONID_A, GamePad::A },
+      { GLFWBUTTONID_B, GamePad::B },
+      { GLFWBUTTONID_X, GamePad::X },
+      { GLFWBUTTONID_Y, GamePad::Y },
+      { GLFWBUTTONID_Start, GamePad::START },
+    };
+    for (const auto& e : keyMap) {
+      if (buttons[e.glfwCode] == GLFW_PRESS) {
+        gamepad.buttons |= e.gamepadCode;
+      } else if (buttons[e.glfwCode] == GLFW_RELEASE) {
+        gamepad.buttons &= ~e.gamepadCode;
       }
-    } else if (keyState[i] != KeyState::release) {
-      keyState[i] = KeyState::release;
+    }
+  } else {
+    static const struct {
+      int glfwCode;
+      uint32_t gamepadCode;
+    } keyMap[] = {
+      { GLFW_KEY_UP, GamePad::DPAD_UP },
+      { GLFW_KEY_DOWN, GamePad::DPAD_DOWN },
+      { GLFW_KEY_LEFT, GamePad::DPAD_LEFT },
+      { GLFW_KEY_RIGHT, GamePad::DPAD_RIGHT },
+      { GLFW_KEY_ENTER, GamePad::START },
+      { GLFW_KEY_A, GamePad::A },
+      { GLFW_KEY_S, GamePad::B },
+      { GLFW_KEY_Z, GamePad::X },
+      { GLFW_KEY_X, GamePad::Y },
+    };
+    for (const auto& e : keyMap) {
+      const int key = glfwGetKey(window, e.glfwCode);
+      if (key == GLFW_PRESS) {
+        gamepad.buttons |= e.gamepadCode;
+      } else if (key == GLFW_RELEASE) {
+        gamepad.buttons &= ~e.gamepadCode;
+      }
     }
   }
-}
-
-/**
-*
-*/
-glm::vec2 Window::GetMousePosition() const
-{
-  double x, y;
-  glfwGetCursorPos(window, &x, &y);
-  return glm::vec2(x, y);
-}
-
-/**
-*
-*/
-int Window::GetMouseButton(int button) const
-{
-  return glfwGetMouseButton(window, button);
+  gamepad.buttonDown = gamepad.buttons & ~prevButtons;
 }
 
 } // namespace GLFWEW
