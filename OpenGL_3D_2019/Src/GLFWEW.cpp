@@ -114,6 +114,19 @@ const GamePad& Window::GetGamePad() const
   return gamepad;
 }
 
+/**
+* ゲームパッドのアナログ入力装置ID.
+*
+* @note 順序はXBOX360ゲームパッド基準.
+*/
+enum GAMEPAD_AXES
+{
+	GAMEPAD_AXES_LEFT_X, ///< 左スティックのx軸,
+	GAMEPAD_AXES_LEFT_Y, ///< 左スティックのY軸,
+	GAMEPAD_AXES_TRIGGER, ///< アナログトリガー,
+	GAMEPAD_AXES_RIGHT_Y, ///<右スティックのY軸,
+	GAMEPAD_AXES_RIGHT_X, ///<右スティックのX軸,
+};
 
 
 } // namespace GLFWEW
