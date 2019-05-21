@@ -124,6 +124,7 @@
     <ClCompile Include="Src\TitleScene.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\BufferObject.h" />
     <ClInclude Include="Src\GameOverScene.h" />
     <ClInclude Include="Src\GamePad.h" />
     <ClInclude Include="Src\GLFWEW.h" />
