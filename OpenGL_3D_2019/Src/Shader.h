@@ -6,10 +6,14 @@
 #include <GL/glew.h>
 #include <glm/vec3.hpp>
 #include <glm/mat4x4.hpp>
+#include <memory>
 
 struct Mesh;
 
 namespace Shader {
+
+	class Program;
+	using ProgramPtr = std::shared_ptr<Program>;
 
 GLuint Build(const GLchar* vsCode, const GLchar* fsCode);
 GLuint BuildFromFile(const char* vsPath, const char* fsPath);
@@ -68,6 +72,7 @@ class Program
 {
 public:
   Program();
+	static ProgramPtr Create(const char* vsPath, const char* fsPath);
   explicit Program(GLuint programId);
   ~Program();
 

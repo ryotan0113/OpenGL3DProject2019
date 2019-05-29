@@ -288,6 +288,9 @@ void Program::SetLightList(const LightList& lights)
 void Program::SetViewProjectionMatrix(const glm::mat4& matVP)
 {
   this->matVP = matVP;
+  if (locMatMVP >= 0) {
+	  glUniformMatrix4fv(locMatMVP, 1, GL_FALSE, &matVP[0][0]);
+  }
 }
 
 /**
@@ -355,6 +358,19 @@ void Program::Draw(const Mesh& mesh, const glm::vec3& t, const glm::vec3& r, con
 
   // メッシュを描画する.
   glDrawElementsBaseVertex(mesh.mode, mesh.count, GL_UNSIGNED_SHORT, mesh.indices, mesh.baseVertex);
+}
+
+/**
+* プログラムオブジェクトを作成する
+*
+* @param vsPath 頂点シェーダーファイル名
+* @param fsPath フラグメントシェーダーファイル名
+*
+* @return 作成したプログラムオブジェクト
+*/
+ProgramPtr Program::Create(const char* vsPath, const char* fsPath)
+{
+	return std::make_shared<Program>(BuildFromFile(vsPath, fsPath));
 }
 
 } // namespace Shader
