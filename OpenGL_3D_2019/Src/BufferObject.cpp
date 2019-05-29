@@ -158,3 +158,17 @@ void VertexArrayObject::VertexAttribPointer(GLuint index, GLint size, GLenum typ
 	glEnableVertexAttribArray(index);
 	glVertexAttribPointer(index, size, type, normalized, stride, reinterpret_cast<GLvoid*>(offset));
 }
+
+/**
+* 全ての頂点アトリビュートを無効化する
+*
+* @sa Bind(),Unbind(),VertexAttribPointer() const
+*/
+void VertexArrayObject::ResetVertexAttribPointer() const
+{
+	GLint maxAttr;
+	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxAttr);
+	for (int i = 0; i < maxAttr; ++i) {
+		glDisableVertexAttribArray(i);
+	}
+}
