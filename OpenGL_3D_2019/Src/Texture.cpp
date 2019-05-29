@@ -156,6 +156,13 @@ void Image2D::Reset(GLuint texId)
 {
   glDeleteTextures(1, &id);
   id = texId;
+  if (id) {
+	  //テクスチャの幅と高さを取得する
+	  glBindTexture(GL_TEXTURE_2D,id);
+	  glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
+	  glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);
+	  glBindTexture(GL_TEXTURE_2D,0);
+  }
 }
 
 /**
@@ -177,6 +184,18 @@ bool Image2D::IsNull() const
 GLuint Image2D::Get() const
 {
   return id;
+}
+
+/**
+* 2Dテクスチャを作成する
+*
+* @param path テクスチャファイル名
+*
+* @return 作成したテクスチャオブジェクト
+*/
+Image2Dptr Image2D::Create(const char* path)
+{
+	return std::make_shared<Image2D>(LoadImage2D(path));
 }
 
 } // namespace Texture
