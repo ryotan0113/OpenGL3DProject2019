@@ -98,5 +98,102 @@ bool SpriteRenderer::AddVertices(const Sprite& sprite)
 		std::cerr << "[警告] " << __func__ << ": 最大表示数を超えています\n";
 		return false;
 	}
+
+	const Texture::Image2Dptr& texture = sprite.Texture();
+	const glm::vec2 reciprocalSize(glm::vec2(1) / glm::vec2(texture->Width(), texture->Height()));
+
+	//矩形を0.0～1.0の範囲に変換
+	Rect rect = sprite.Rectangle();
+	rect.origin *= reciprocalSize;
+	rect.size *= reciprocalSize;
+
+	//中心からの大きさを計算
+	const glm::vec2 halfSize = sprite.Rectangle().size * 0.5f;
+
+	//座標変換行列を作成
+	const glm::mat4 matT = glm::translate(glm::mat4(1), sprite.Position());
+	const glm::mat4 matR = glm::rotate(glm::mat4(1), sprite.Rotation(), glm::vec3(0, 0, 1));
+	const glm::mat4 matS = glm::scale(glm::mat4(1), glm::vec3(sprite.Scale(), 1));
+	const glm::mat4 transform = matT * matR * matS;
+
+	Vertex v[4];
+
+	v[0].position = transform * glm::vec4(-halfSize.x, -halfSize.y, 0, 1);
+	v[0].color = sprite.Color();
+	v[0].texCoord = rect.origin;
+
+	v[1].position = transform * glm::vec4(halfSize.x, -halfSize.y, 0, 1);
+	v[1].color = sprite.Color();
+	v[1].texCoord = glm::vec2(rect.origin.x + rect.size.x, rect.origin.y);
+
+	v[2].position = transform * glm::vec4(halfSize.x, halfSize.y, 0, 1);
+	v[2].color = sprite.Color();
+	v[2].texCoord = rect.origin + rect.size;
+
+	v[3].position = transform * glm::vec4(-halfSize.x, halfSize.y, 0, 1);
+	v[3].color = sprite.Color();
+	v[3].texCoord = glm::vec2(rect.origin.x, rect.origin + rect.size.y);
+
+	vertices.insert(vertices.end(), v, v + 4);
+
+	if (primitives.empty()) {
+		//最初のプリミティブを作成する
+		primitives.push_back({ 6,0,texture });
+	}
+	else {
+		//同じテクスチャを使っているならインデックス数を四角形一つ分(インデックス6個)増やす
+		//テクスチャが違う場合は新しいプリミティブを作成する
+		Primitive& data = primitives.back();
+		if (data.texture == texture) {
+			data.count += 6;
+		}
+		else {
+			primitives.push_back({ 6,data.offset + data.count * sizeof(GLshort),texture });
+		}
+	}
+
+
+
 	return true;
 }
+
+/**
+* 頂点データの作成を終了する
+*/
+void SpriteRenderer::EndUpdate()
+{
+	vbo.BufferSubData(0, vertices.size() * sizeof(Vertex), vertices.data());
+	vertices.clear();
+	vertices.shrink_to_fit();
+}
+
+/**
+* スプライトを描画する
+*
+* @param texture 描画に使用するテクスチャ
+* @param screenSize
+*/
+void SpriteRenderer::Draw(const glm::vec2& screenSize) const
+{
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	vao.Bind();
+	program -> Use();
+
+	//平衡投影、原点は画面の中心
+	const glm::vec2 halfScreenSize = screenSize * 0.5f;
+	const glm::mat4x4 matProj = glm::ortho(-halfScreenSize.x, halfScreenSize.x, -halfScreenSize.y, halfScreenSize.y,1.0f,1000.0f);
+	const glm::mat4x4 matView = glm::lookAt(glm::vec3(0, 0, 100), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+	program->SetViewProjectionMatrix(matProj * matView);
+
+	for (const Primitive& primitive : primitives) {
+		program->BindTexture(0, primitive.texture->Get());
+		glDrawElements(GL_TRIANGLES, primitive.count, GL_UNSIGNED_SHORT, reinterpret_cast<const GLvoid*>(primitive.offset));
+	}
+	program->BindTexture(0, 0);
+	vao.Unbind();
+}
+
+

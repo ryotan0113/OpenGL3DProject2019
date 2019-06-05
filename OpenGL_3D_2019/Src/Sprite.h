@@ -40,7 +40,7 @@ public:
 
 	//Šg‘å—¦‚Ìİ’èEæ“¾
 	void Scale(const glm::vec2& s) { scale = s; }
-	const glm::vec2& Scsle() const { return scale; }
+	const glm::vec2& Scale() const { return scale; }
 
 	//F‚Ìİ’èEæ“¾
 	void Color(const glm::vec4& c) { color = c; }
