@@ -85,5 +85,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Res\Sprite.vert">
+      <Filter>Src</Filter>
+    </None>
+    <None Include="Res\Sprite.frag">
+      <Filter>Src</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -196,4 +196,11 @@ void SpriteRenderer::Draw(const glm::vec2& screenSize) const
 	vao.Unbind();
 }
 
+/**
+* スプライト描画データを消去する
+*/
+void SpriteRenderer::Clear()
+{
+	primitives.clear();
+}
 
