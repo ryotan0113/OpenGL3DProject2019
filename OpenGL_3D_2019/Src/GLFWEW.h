@@ -7,33 +7,58 @@
 #include "GamePad.h"
 #include <GLFW/glfw3.h>
 
+
+
 namespace GLFWEW {
 
-/**
-* GLFWとGLEWのラッパークラス.
-*/
-class Window
-{
-public:
-  static Window& Instance();
-  bool Init(int w, int h, const char* title);
-  bool ShouldClose() const;
-  void SwapBuffers() const;
-  const GamePad& GetGamePad() const;
+	/**
+	* GLFWとGLEWのラッパークラス.
+	*/
+	class Window
+	{
+	public:
+		static Window& Instance();
+		bool Init(int w, int h, const char* title);
+		bool ShouldClose() const;
+		void SwapBuffers() const;
+		void Update();
 
+		void InitTimer();
+		void UpdateTimer();
+		double DeltaTime() const;
+		int Width() const { return width; }
+		int Height() const { return height; }
 
-private:
-  Window()= default;
-  ~Window();
-  Window(const Window&) = delete;
-  Window& operator=(const Window&) = delete;
-  void UpdateGamePad();
+		bool IsKeyDown(int key) const;
+		bool IsKeyPressed(int key) const;
+		glm::vec2 GetMousePosition() const;
+		int GetMouseButton(int button) const;
+		const GamePad& GetGamePad() const;
 
-  bool isGLFWInitialized = false;
-  bool isInitialized = false;
-  GLFWwindow* window = nullptr;
-  GamePad gamepad;
-};
+	private:
+		Window();
+		~Window();
+		Window(const Window&) = delete;
+		Window& operator=(const Window&) = delete;
+		void UpdateGamePad();
+
+		bool isGLFWInitialized = false;
+		bool isInitialized = false;
+		GLFWwindow* window = nullptr;
+		int width = 0;
+		int height = 0;
+		double previousTime = 0;
+		double deltaTime = 0;
+		GamePad gamepad;
+
+		enum class KeyState : char {
+			release,
+			press1st,
+			press,
+		};
+
+		KeyState keyState[GLFW_KEY_LAST + 1];
+	};
 
 } // namespace GLFWEW
 

@@ -76,6 +76,9 @@ bool Window::Init(int w, int h, const char* title)
     return false;
   }
 
+  width = w;
+  height = h;
+
   const GLubyte* renderer = glGetString(GL_RENDERER);
   std::cout << "Renderer: " << renderer << std::endl;
   const GLubyte* version = glGetString(GL_VERSION);
