@@ -132,6 +132,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\BufferObject.h" />
+    <ClInclude Include="Src\Font.h" />
     <ClInclude Include="Src\GameOverScene.h" />
     <ClInclude Include="Src\GamePad.h" />
     <ClInclude Include="Src\Geometry.h" />
