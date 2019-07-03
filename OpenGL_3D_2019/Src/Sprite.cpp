@@ -98,7 +98,7 @@ bool SpriteRenderer::AddVertices(const Sprite& sprite)
 		std::cerr << "[Œx] " << __func__ << ": Å‘å•\¦”‚ğ’´‚¦‚Ä‚¢‚Ü‚·\n";
 		return false;
 	}
-
+	
 	const Texture::Image2Dptr& texture = sprite.Texture();
 	const glm::vec2 reciprocalSize(glm::vec2(1) / glm::vec2(texture->Width(), texture->Height()));
 
@@ -132,7 +132,7 @@ bool SpriteRenderer::AddVertices(const Sprite& sprite)
 
 	v[3].position = transform * glm::vec4(-halfSize.x, halfSize.y, 0, 1);
 	v[3].color = sprite.Color();
-	v[3].texCoord = glm::vec2(rect.origin.x, rect.origin + rect.size.y);
+	v[3].texCoord = glm::vec2(rect.origin.x, rect.origin.y + rect.size.y);
 
 	vertices.insert(vertices.end(), v, v + 4);
 
@@ -152,8 +152,8 @@ bool SpriteRenderer::AddVertices(const Sprite& sprite)
 		}
 	}
 
-
-
+	
+	
 	return true;
 }
 
@@ -180,7 +180,7 @@ void SpriteRenderer::Draw(const glm::vec2& screenSize) const
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	vao.Bind();
-	program -> Use();
+	program->Use();
 
 	//•½t“Š‰eAŒ´“_‚Í‰æ–Ê‚Ì’†S
 	const glm::vec2 halfScreenSize = screenSize * 0.5f;

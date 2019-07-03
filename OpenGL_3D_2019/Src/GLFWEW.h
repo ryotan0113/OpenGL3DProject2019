@@ -6,6 +6,7 @@
 #include <GL/glew.h>
 #include "GamePad.h"
 #include <GLFW/glfw3.h>
+#include <glm/vec2.hpp>
 
 
 
@@ -30,13 +31,14 @@ namespace GLFWEW {
 		int Height() const { return height; }
 
 		bool IsKeyDown(int key) const;
+
 		bool IsKeyPressed(int key) const;
 		glm::vec2 GetMousePosition() const;
 		int GetMouseButton(int button) const;
 		const GamePad& GetGamePad() const;
 
 	private:
-		Window();
+		Window() = default;
 		~Window();
 		Window(const Window&) = delete;
 		Window& operator=(const Window&) = delete;

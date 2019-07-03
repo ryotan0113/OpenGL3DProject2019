@@ -47,3 +47,13 @@ void TitleScene::Update(float deltaTime)
 	}
 	spriteRenderer.EndUpdate();
 }
+
+/**
+* ƒV[ƒ“‚ğ•`‰æ‚·‚é
+*/
+void TitleScene::Render()
+{
+	const GLFWEW::Window& window = GLFWEW::Window::Instance();
+	const glm::vec2 screenSize(window.Width(), window.Height());
+	spriteRenderer.Draw(screenSize);
+}
