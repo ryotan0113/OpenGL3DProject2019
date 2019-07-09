@@ -131,3 +131,71 @@ bool FontRenderer::LoadFromFile(const char* filename)
 	}
 	return true;
 }
+/**
+* 文字列の追加を開始する
+*/
+void FontRenderer::BeginUpdate()
+{
+	spriteRenderer.BeginUpdate();
+}
+
+/**
+* 文字列を追加する
+*
+* @param position 表示開始座標(Y座標はフォントのベースライン)
+* @param str 追加するUTF-16文字列
+*
+* @retval true 追加成功
+* @retval false 追加失敗
+*/
+bool FontRenderer::AddString(const glm::vec2& position, const wchar_t* str)
+{
+	glm::vec2 pos = position;
+	for (const wchar_t* itr = str; *itr; ++itr) {
+		const CharacterInfo& info = characterInfoList[*itr];
+		if (info.id >= 0 && info.size.x && info.size.y) {
+			//スプライトの座標は画像の中心を指定するが、フォントは左上を指定する
+			//そこで、その差を打ち消すための補正値を計算する
+			const float baseX = info.size.x * 0.5f + info.offset.x;
+			const float baseY = base - info.size.y * 0.5f - info.offset.y;
+			const glm::vec3 spritePos = glm::vec3(pos + glm::vec2(baseX, baseY), 0);
+
+			Sprite sprite(textures[info.page]);
+			sprite.Position(spritePos);
+			sprite.Rectangle({ info.uv, info.size });
+			if (!spriteRenderer.AddVertices(sprite)) {
+				return false;
+			}
+		}
+		pos.x += info.xadvance; //次の表示位置へ移動
+	}
+	return true;
+}
+
+/**
+* 文字列の追加を終了する
+*/
+void FontRenderer::EndUpdate()
+{
+	spriteRenderer.EndUpdate();
+}
+
+/**
+* フォントを描画する
+*
+* @param screenSize 画面サイズ
+*/
+void FontRenderer::Draw(const glm::vec2& screenSize) const
+{
+	spriteRenderer.Draw(screenSize);
+}
+
+/**
+* 行の高さを取得する
+*
+* @return 行の高さ(ピクセル数)
+*/
+float FontRenderer::LineHeight() const
+{
+	return lineHeight;
+}
