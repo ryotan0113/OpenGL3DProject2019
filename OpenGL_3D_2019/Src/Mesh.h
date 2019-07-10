@@ -93,6 +93,8 @@ namespace Mesh {
 		bool AddMesh(const char* name, const Primitive& primitive, const Material& material);
 		FilePtr GetFile(const char* name) const;
 
+		void AddCube(const char* name);
+
 	private:
 		BufferObject vbo;
 		BufferObject ibo;
