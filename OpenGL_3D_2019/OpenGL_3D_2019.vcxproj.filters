@@ -88,6 +88,9 @@
     <ClInclude Include="Src\Font.h">
       <Filter>Src</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Mesh.h">
+      <Filter>Src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
