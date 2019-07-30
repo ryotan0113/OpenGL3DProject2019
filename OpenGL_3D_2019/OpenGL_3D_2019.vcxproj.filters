@@ -103,5 +103,11 @@
     <None Include="Res\Sprite.vert">
       <Filter>Res</Filter>
     </None>
+    <None Include="Res\StaticMesh.vert">
+      <Filter>Res</Filter>
+    </None>
+    <None Include="Res\StaticMesh.frag">
+      <Filter>Res</Filter>
+    </None>
   </ItemGroup>
 </Project>
