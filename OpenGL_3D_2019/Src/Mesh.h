@@ -104,6 +104,8 @@ namespace Mesh {
 		Shader::ProgramPtr progStaticMesh;
 	};
 
+	void Draw(const FilePtr&, const glm::mat4& matVP, const glm::mat4& matM);
+
 
 } // namespace Mesh
 
