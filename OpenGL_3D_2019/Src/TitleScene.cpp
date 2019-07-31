@@ -3,6 +3,7 @@
 */
 #include "TitleScene.h"
 #include "MainGameScene.h"
+#include "GamePad.h"
 #include "GLFWEW.h"
 
 /**

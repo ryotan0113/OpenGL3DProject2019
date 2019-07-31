@@ -88,6 +88,14 @@ bool Window::Init(int w, int h, const char* title)
 }
 
 /**
+*
+*/
+void Window::Update() {
+
+	UpdateGamePad();
+}
+
+/**
 * ウィンドウを閉じるべきか調べる.
 *
 * @retval true 閉じる.

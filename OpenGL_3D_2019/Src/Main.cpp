@@ -18,10 +18,14 @@ int main()
 
 	while (!window.ShouldClose())
 	{
-		//window.Update();
-
 		const float deltaTime = 1.0f / 60.0f;
+
+		window.Update();
+
 		sceneStack.Update(deltaTime);
+
+		//const float deltaTime = 1.0f / 60.0f;
+
 
 		/**
 		//ESCキーが押されたら終了ウィンドウを表示
@@ -31,6 +35,7 @@ int main()
 			}
 		}
 		*/
+		
 
 
 

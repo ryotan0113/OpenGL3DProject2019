@@ -246,7 +246,7 @@ namespace Mesh
 	* @param matVP 描画に使用するビュープロジェクション行列
 	* @param 描画に使用するモデル行列
 	*/
-	void Draw(const FilePtr& file, const glm::mat4 matVP, const glm::mat4& matM)
+	void Draw(const FilePtr& file, const glm::mat4& matVP, const glm::mat4& matM)
 	{
 		if (!file || file->meshes.empty() || file->materials.empty()) {
 			return;
@@ -278,5 +278,6 @@ namespace Mesh
 		glBindTexture(GL_TEXTURE_2D, 0);
 		glUseProgram(0);
 	}
+
 
 }// namespace Mesh

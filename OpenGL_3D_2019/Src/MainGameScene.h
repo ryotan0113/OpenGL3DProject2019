@@ -20,8 +20,8 @@ public:
 	virtual ~MainGameScene() = default;
 	virtual bool Initialize() override;
 	virtual void ProcessInput() override;
-	virtual void Update(float) override {}
-	virtual void Render() override {}
+	virtual void Update(float) override;
+	virtual void Render() override;
 	virtual void Finalize() override {}
 
 private:

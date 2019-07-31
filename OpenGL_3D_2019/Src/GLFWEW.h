@@ -26,7 +26,7 @@ namespace GLFWEW {
 
 		void InitTimer();
 		void UpdateTimer();
-		double DeltaTime() const;
+		double DeltaTime() const { return deltaTime; }
 		int Width() const { return width; }
 		int Height() const { return height; }
 
