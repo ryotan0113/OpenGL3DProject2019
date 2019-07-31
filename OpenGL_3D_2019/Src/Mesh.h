@@ -58,8 +58,7 @@ namespace Mesh {
 	/**
 	* メッシュ
 	*/
-	struct Mesh
-	{
+	struct Mesh{
 		std::string name; //メッシュ名
 		std::vector<Primitive> primitives;
 	};

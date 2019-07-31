@@ -19,9 +19,6 @@ bool TitleScene::Initialize()
 	spr.Scale(glm::vec2(2));
 	sprites.push_back(spr);
 
-	fontRenderer.Init(1000);
-	fontRenderer.LoadFromFile("Res/font.fnt");
-
 	return true;
 }
 
@@ -68,5 +65,4 @@ void TitleScene::Render()
 	const GLFWEW::Window& window = GLFWEW::Window::Instance();
 	const glm::vec2 screenSize(window.Width(), window.Height());
 	spriteRenderer.Draw(screenSize);
-	fontRenderer.Draw(screenSize);
 }

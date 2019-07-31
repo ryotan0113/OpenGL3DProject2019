@@ -95,11 +95,11 @@ namespace Mesh
 		vao->Create(vbo.Id(), ibo.Id());
 		vao->Bind();
 		vao->VertexAttribPointer(
-			0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), offsetof(Vertex,position));
+			0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),vOffset + offsetof(Vertex,position));
 		vao->VertexAttribPointer(
-			1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), offsetof(Vertex,texCoord));
+			1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), vOffset + offsetof(Vertex,texCoord));
 		vao->VertexAttribPointer(
-			2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), offsetof(Vertex, normal));
+			2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), vOffset + offsetof(Vertex, normal));
 		vao->Unbind();
 
 		//プリミティブのメンバ変数を設定
@@ -108,7 +108,7 @@ namespace Mesh
 		p.count = static_cast<GLsizei>(count);
 		p.type = type;
 		p.indices = reinterpret_cast<const GLvoid*>(iOffset);
-		p.baseVertex = vOffset / sizeof(Vertex);
+		p.baseVertex = 0;
 		p.vao = vao;
 		p.material = 0; //マテリアルは０番で固定
 
