@@ -39,11 +39,11 @@ bool FontRenderer::LoadFromFile(const char* filename)
 	int line = 1; //読み込む行番号(エラー表示用)
 	int spacing[2]; //1行目の読み込みチェック用
 	int ret = fscanf(fp.get(),
-		"info face=\"%*[^\"]\" size=%*d bold=%*d italic=%*d charset=%*s unicode=%*d"
-		" stretchH=%*d smooth=%*d aa=%*d padding=%*d,%*d,%*d,%*d spacing=%d,%d%*[^\n]",
+		"info face=\"%*[^\"]\" size=%*d bold=%*d italic=%*d charset%*s unicode=%*d"
+		"stretchH=%*d smooth=%*d aa=%*d padding=%*d,%*d,%*d,%*d spacing=%d,%d%*[^\n]",
 		&spacing[0], &spacing[1]);
 	if (ret < 2) {
-		std::cerr << "[エラーinfo]" << __func__ << ": " << filename << "の読み込みに失敗(" <<
+		std::cerr << "[エラー]" << __func__ << ": " << filename << "の読み込みに失敗(" <<
 			line << "行目).\n";
 		return false;
 	}
@@ -52,10 +52,10 @@ bool FontRenderer::LoadFromFile(const char* filename)
 	//common行を読み込む
 	float scaleH;
 	ret = fscanf(fp.get(),
-		" common lineHeight=%f base=%f scaleW=%*d scaleH=%f pages=%*d packed=%*d%*[^\n]",
+		"common lineHeight=%f base=%f scaleW=%*d scaleH=%f pages=%*d packed=%*d%*[^\n]",
 		&lineHeight, &base, &scaleH);
 	if (ret < 3) {
-		std::cerr << "[エラーcommon]" << __func__ << ": " << filename << "の読み込みに失敗(" <<
+		std::cerr << "[エラー]" << __func__ << ": " << filename << "の読み込みに失敗(" <<
 			line << "行目).\n";
 		return false;
 	}
@@ -67,19 +67,19 @@ bool FontRenderer::LoadFromFile(const char* filename)
 	for (;;) {
 		int id;
 		char tex[256];
-		ret = fscanf(fp.get(), " page id=%d file=\"%255[^\"]\"", &id, tex);
+		ret = fscanf(fp.get(), "page id=%d file=\"%255[^\"]\"", &id, tex);
 		if (ret < 2) {
 			break;
 		}
 		tex[sizeof(tex) / sizeof(tex[0]) - 1] = '\0'; //0終端を保証する
 		if (texNameList.size() <= static_cast<size_t>(id)) {
-			texNameList.resize(id + 1);
+			texNameList.reserve(id + 1);
 		}
 		texNameList[id] = std::string("Res/") + tex;
 		++line;
 	}
 	if (texNameList.empty()) {
-		std::cerr << "[エラーpage]" << __func__ << ":" << filename << "の読み込みに失敗(" <<
+		std::cerr << "[エラー]" << __func__ << ":" << filename << "の読み込みに失敗(" <<
 			line << "行目).\n";
 		return false;
 	}
@@ -88,7 +88,7 @@ bool FontRenderer::LoadFromFile(const char* filename)
 	int charCount; //char行の数
 	ret = fscanf(fp.get(), "chars count=%d", &charCount);
 	if (ret < 1) {
-		std::cerr << "[エラーchars]" << __func__ << ": " << filename << "の読み込みに失敗(" <<
+		std::cerr << "[エラー]" << __func__ << ": " << filename << "の読み込みに失敗(" <<
 			line << "行目).\n";
 		return false;
 	}
@@ -100,12 +100,12 @@ bool FontRenderer::LoadFromFile(const char* filename)
 	for (int i = 0; i < charCount; ++i) {
 		CharacterInfo info;
 		ret = fscanf(fp.get(),
-			" char id=%d x=%f y=%f width=%f height=%f xoffset=%f yoffset=%f xadvance=%f"
-			" page=%d chnl=%*d",
+			"char id=%d x=%f y=%f width=%f height=%f xoffset=$f yoffset=%f xadvance=%f"
+			"page=%d chnl=%*d",
 			&info.id, &info.uv.x, &info.uv.y, &info.size.x, &info.size.y,
 			&info.offset.x, &info.offset.y, &info.xadvance, &info.page);
 		if (ret < 9) {
-			std::cerr << "[エラーcharslist]" << __func__ << ": " << filename << "の読み込みに失敗(" <<
+			std::cerr << "[エラー]" << __func__ << ": " << filename << "の読み込みに失敗(" <<
 				line << "行目).\n";
 			return false;
 		}

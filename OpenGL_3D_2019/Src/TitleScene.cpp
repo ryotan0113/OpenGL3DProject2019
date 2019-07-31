@@ -46,15 +46,6 @@ void TitleScene::Update(float deltaTime)
 		spriteRenderer.AddVertices(e);
 	}
 	spriteRenderer.EndUpdate();
-
-	const GLFWEW::Window& window = GLFWEW::Window::Instance();
-	const float w = window.Width();
-	const float h = window.Height();
-	const float lineHeight = fontRenderer.LineHeight();
-	fontRenderer.BeginUpdate();
-	fontRenderer.AddString(glm::vec2(-w * 0.5f + 32, h * 0.5f - lineHeight), L"タイトル画面");
-	fontRenderer.AddString(glm::vec2(-128, 0), L"アクションゲーム");
-	fontRenderer.EndUpdate();
 }
 
 /**
