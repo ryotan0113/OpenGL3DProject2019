@@ -1,69 +1,149 @@
 /**
 * @file Texture.cpp
 */
+#define NOMINMAX
 #include "Texture.h"
 #include <cstdint>
 #include <vector>
 #include <fstream>
 #include <iostream>
+#include <algorithm>
 
 /// テクスチャ関連の関数やクラスを格納する名前空間.
 namespace Texture {
 
-/**
-* 2Dテクスチャを作成する.
-*
-* @param width   テクスチャの幅(ピクセル数).
-* @param height  テクスチャの高さ(ピクセル数).
-* @param data    テクスチャデータへのポインタ.
-* @param format  転送元画像のデータ形式.
-* @param type    転送元画像のデータ格納形式.
-*
-* @retval 0以外  作成したテクスチャ・オブジェクトのID.
-* @retval 0      テクスチャの作成に失敗.
-*/
-GLuint CreateImage2D(GLsizei width, GLsizei height, const GLvoid* data, GLenum format, GLenum type)
-{
-  GLuint id;
-  glGenTextures(1, &id);
-  glBindTexture(GL_TEXTURE_2D, id);
-  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, format, type, data);
-  glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-  const GLenum result = glGetError();
-  if (result != GL_NO_ERROR) {
-    std::cerr << "ERROR: テクスチャの作成に失敗(0x" << std::hex << result << ").";
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glDeleteTextures(1, &id);
-    return 0;
-  }
+	/**
+	* 色データを取得する
+	*
+	* @param x X座標
+	* @param y Y座標
+	*
+	* @return 座標(x,y)の色を0.0～1.0で表した値。
+	*		  色要素がデータに存在しない場合、RGBは0.0、Aは1.0になる
+	*/
+	glm::vec4 ImageData::GetColor(int x, int y) const
+	{
+		//座標を画像の範囲に制限。
+		x = std::max(0, std::min(x, width - 1));
+		y = std::max(0, std::min(y, height - 1));
 
-  // テクスチャのパラメータを設定する.
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  if (format == GL_RED) {
-    const GLint swizzle[] = { GL_RED, GL_RED, GL_RED, GL_ONE };
-    glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzle);
-  }
+		if (type == GL_UNSIGNED_BYTE) {
+			//各色１バイトのデータ
+			glm::vec4 color(0, 0, 0, 255);
+			if (format == GL_BGRA) {
+				//BGRAの順番で１バイトずつ、合計４バイト格納されている
+				const uint8_t* p = &data[x * 4 + y * (width * 4)];
+				color.b = p[0];
+				color.g = p[1];
+				color.r = p[2];
+				color.a = p[3];
+			}
+			else if (format == GL_BGR) {
+				//BGRの順番で１バイトずつ、合計３バイト格納されている
+				const uint8_t* p = &data[x * 3 + y * (width * 3)];
+				color.b = p[0];
+				color.g = p[1];
+				color.r = p[2];
+			}
+			else if (format == GL_RED) {
+				//赤色だけ、合計１バイト格納されている
+				color.r = data[x + y * width];
+			}
+			return color / 255.0f;
+		}
+		else if (type == GL_UNSIGNED_SHORT_1_5_5_5_REV) {
+			//色が２バイトに詰め込まれたデータ
+			glm::vec4 color(0, 0, 0, 1);
+			const uint8_t* p = &data[x * 2 + y * (width * 2)];
+			const uint16_t c = p[0] + p[1] * 0x100; //2つのバイトを結合
+			if (format == GL_BGRA) {
+				//16ビットのデータから各色を取り出す
+				color.b = static_cast<float>((c & 0b0000'0000'0001'1111));
+				color.g = static_cast<float>((c & 0b0000'0011'1110'0000) >> 5);
+				color.r = static_cast<float>((c & 0b0111'1100'0000'0000) >> 10);
+				color.a = static_cast<float>((c & 0b1000'0000'0000'0000) >> 15);
+			}
+			return color / glm::vec4(31.0f, 31.0f, 31.0f, 1.0f);
+		}
+		return glm::vec4(0, 0, 0, 1);
+	}
 
-  glBindTexture(GL_TEXTURE_2D, 0);
 
-  return id;
-}
+	/**
+	* 2Dテクスチャを作成する.
+	*
+	* @param width   テクスチャの幅(ピクセル数).
+	* @param height  テクスチャの高さ(ピクセル数).
+	* @param data    テクスチャデータへのポインタ.
+	* @param format  転送元画像のデータ形式.
+	* @param type    転送元画像のデータ格納形式.
+	*
+	* @retval 0以外  作成したテクスチャ・オブジェクトのID.
+	* @retval 0      テクスチャの作成に失敗.
+	*/
+	GLuint CreateImage2D(GLsizei width, GLsizei height, const GLvoid* data, GLenum format, GLenum type)
+	{
+		GLuint id;
+		glGenTextures(1, &id);
+		glBindTexture(GL_TEXTURE_2D, id);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, format, type, data);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+		const GLenum result = glGetError();
+		if (result != GL_NO_ERROR) {
+			std::cerr << "ERROR: テクスチャの作成に失敗(0x" << std::hex << result << ").";
+			glBindTexture(GL_TEXTURE_2D, 0);
+			glDeleteTextures(1, &id);
+			return 0;
+		}
 
-/**
-* ファイルから2Dテクスチャを読み込む.
-*
-* @param path 2Dテクスチャとして読み込むファイルのパス.
-*
-* @retval 0以外  作成したテクスチャ・オブジェクトのID.
-* @retval 0      テクスチャの作成に失敗.
-*/
-GLuint LoadImage2D(const char* path)
-{
+		// テクスチャのパラメータを設定する.
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		if (format == GL_RED) {
+			const GLint swizzle[] = { GL_RED, GL_RED, GL_RED, GL_ONE };
+			glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzle);
+		}
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		return id;
+	}
+
+	/**
+	* ファイルから2Dテクスチャを読み込む.
+	*
+	* @param path 2Dテクスチャとして読み込むファイルのパス.
+	*
+	* @retval 0以外  作成したテクスチャ・オブジェクトのID.
+	* @retval 0      テクスチャの作成に失敗.
+	*/
+	GLuint LoadImage2D(const char* path)
+	{
+		ImageData imageData;
+		if (!LoadImage2D(path, &imageData)) {
+			return 0;
+		}
+		return CreateImage2D(imageData.width, imageData.height, imageData.data.data(),
+			imageData.format, imageData.type);
+	}
+
+	/**
+	* ファイルから画像データを読み込む
+	*
+	* @param path	画像として読み込むファイルのパス
+	* @param imageData 画像データを格納する構造体
+	*
+	* @retval true 読み込み成功
+	* @retval false 読み込み失敗
+	*/
+	bool LoadImage2D(const char* path, ImageData* imageData)
+	{
+
+
   // TGAヘッダを読み込む.
   std::basic_ifstream<uint8_t> ifs;
 
@@ -125,8 +205,12 @@ GLuint LoadImage2D(const char* path)
     type = GL_UNSIGNED_SHORT_1_5_5_5_REV;
   }
 
-  // 読み込んだ画像データからテクスチャを作成する.
-  return CreateImage2D(width, height, buf.data(), format, type);
+  imageData->width = width;
+  imageData->height = height;
+  imageData->format = format;
+  imageData->type = type;
+  imageData->data.swap(buf);
+  return true;
 }
 
 /**
