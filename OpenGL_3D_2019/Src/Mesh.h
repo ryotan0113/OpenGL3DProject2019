@@ -1,8 +1,9 @@
 /**
 * @file Mesh.h
 */
-#ifndef MESH_H_INCLDED
+#ifndef MESH_H_INCLUDED
 #define MESH_H_INCLUDED
+
 #include <GL/glew.h>
 #include "BufferObject.h"
 #include "Texture.h"
@@ -16,7 +17,7 @@
 namespace Mesh {
 
 	//êÊçsêÈåæ
-	class Mesh;
+	struct Mesh;
 	using MeshPtr = std::shared_ptr<Mesh>;
 	class Buffer;
 	using BufferPtr = std::shared_ptr<Buffer>;

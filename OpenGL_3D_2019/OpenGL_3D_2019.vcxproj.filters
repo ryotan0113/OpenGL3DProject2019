@@ -50,6 +50,9 @@
     <ClCompile Include="Src\Mesh.cpp">
       <Filter>Src</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Terrain.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Scene.h">
@@ -112,5 +115,10 @@
     <None Include="Res\StaticMesh.frag">
       <Filter>Res</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Res\Terrain.tga">
+      <Filter>Res</Filter>
+    </Image>
   </ItemGroup>
 </Project>
