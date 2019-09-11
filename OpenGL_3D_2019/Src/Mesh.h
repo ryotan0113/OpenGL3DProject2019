@@ -96,6 +96,7 @@ namespace Mesh {
 			const std::vector<std::vector<char>>&);
 		bool LoadMesh(const char* path);
 		FilePtr GetFile(const char* name) const;
+		void SetViewProjectionMatrix(const glm::mat4&) const;
 
 		void AddCube(const char* name);
 
@@ -108,7 +109,7 @@ namespace Mesh {
 		Shader::ProgramPtr progStaticMesh;
 	};
 
-	void Draw(const FilePtr&, const glm::mat4& matVP, const glm::mat4& matM);
+	void Draw(const FilePtr&, const glm::mat4& matM);
 
 
 } // namespace Mesh

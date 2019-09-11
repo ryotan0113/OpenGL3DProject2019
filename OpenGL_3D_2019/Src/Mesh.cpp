@@ -476,7 +476,7 @@ namespace Mesh
 				}
 				glm::vec4 col(0, 0, 0, 1);
 				const std::vector<json11::Json>& baseColorFactor = pbr["baseColorFactor"].array_items();
-				if (baseColorFactor.size() <= 4) {
+				if (baseColorFactor.size() >= 4) {
 					for (size_t i = 0; i < 4; ++i) {
 						col[i] = static_cast<float>(baseColorFactor[i].number_value());
 					}
@@ -577,13 +577,24 @@ namespace Mesh
 	}
 
 	/**
+	* シェーダーにビュー・プロジェクション行列を設定する
+	*
+	* @param matVP ビュー・プロジェクション行列
+	*/
+	void Buffer::SetViewProjectionMatrix(const glm::mat4& matVP) const
+	{
+		progStaticMesh->Use();
+		progStaticMesh->SetViewProjectionMatrix(matVP);
+		glUseProgram(0);
+	}
+
+	/**
 	* メッシュを追加する
 	*
 	* @param file 描画するファイル
-	* @param matVP 描画に使用するビュープロジェクション行列
 	* @param 描画に使用するモデル行列
 	*/
-	void Draw(const FilePtr& file, const glm::mat4& matVP, const glm::mat4& matM)
+	void Draw(const FilePtr& file, const glm::mat4& matM)
 	{
 		if (!file || file->meshes.empty() || file->materials.empty()) {
 			return;
@@ -595,7 +606,6 @@ namespace Mesh
 				p.vao->Bind();
 				const Material& m = file->materials[p.material];
 				m.program->Use();
-				m.program->SetViewProjectionMatrix(matVP);
 				m.program->SetModelMatrix(matM);
 				glActiveTexture(GL_TEXTURE0);
 
