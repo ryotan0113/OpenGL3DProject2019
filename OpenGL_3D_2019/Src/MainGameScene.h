@@ -34,6 +34,8 @@ private:
 	Mesh::Buffer meshBuffer;
 	Terrain::HeightMap heightMap;
 	StaticMeshActorPtr player;
+	ActorList enemies;
+	ActorList trees;
 
 	struct Camera
 	{
