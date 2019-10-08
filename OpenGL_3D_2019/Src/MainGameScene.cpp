@@ -10,6 +10,33 @@
 #include <random>
 
 /**
+* 衝突を解決する
+*
+* @param a 衝突したアクターその１
+* @param b 衝突したアクターその２
+* @param p 衝突位置
+*/
+void PlayerCollisionHandler(const ActorPtr& a, const ActorPtr& b, const glm::vec3& p)
+{
+	const glm::vec3 v = a->colWorld.center - p;
+	//衝突位置との距離が近づきすぎないか調べる
+	if (dot(v, v) > FLT_EPSILON) {
+		//aをbに重ならない位置まで移動
+		const glm::vec3 vn = normalize(v);
+		const float radiusSum = a->colWorld.r + b->colWorld.r;
+		const float distance = radiusSum - glm::length(v) + 0.01f;
+		a->position += vn * distance;
+		a->colWorld.center += vn * distance;
+	}else {
+		//移動を取り消す(距離が近すぎる場合の例外処理)
+		const float deltaTime = static_cast<float>(GLFWEW::Window::Instance().DeltaTime());
+		const glm::vec3 deltaVelocity = a->velocity * deltaTime;
+		a->position -= deltaVelocity;
+		a->colWorld.center -= deltaVelocity;
+	}
+}
+
+/**
 * シーンを初期化する
 *
 * retval true 初期化成功
@@ -40,6 +67,7 @@ bool MainGameScene::Initialize() {
 	startPos.y = heightMap.Height(startPos);
 	player = std::make_shared<StaticMeshActor>(
 		meshBuffer.GetFile("Res/bikuni.gltf"), "Player", 20, startPos);
+	player->colLocal = Collision::Sphere{ glm::vec3(0),0.5f };
 
 	std::mt19937 rand;
 	rand.seed(0);
@@ -60,6 +88,7 @@ bool MainGameScene::Initialize() {
 			rotation.y = std::uniform_real_distribution<float>(0, 6.3f)(rand);
 			StaticMeshActorPtr p = std::make_shared<StaticMeshActor>(
 				mesh, "Kooni", 13, position, rotation);
+			p->colLocal = Collision::Sphere{ glm::vec3(0), 1.0f };
 			enemies.Add(p);
 		}
 	}
@@ -80,9 +109,10 @@ bool MainGameScene::Initialize() {
 			//木の向きをランダムに選択
 			glm::vec3 rotation(0);
 			rotation.y = std::uniform_real_distribution<float>(0, 6.3f)(treesrand);
-			StaticMeshActorPtr p = std::make_shared<StaticMeshActor>(
+			StaticMeshActorPtr t = std::make_shared<StaticMeshActor>(
 				mesh, "Tree", 13, position, rotation);
-			trees.Add(p);
+			t->colLocal = Collision::Sphere{ glm::vec3(0), 1.0f };
+			trees.Add(t);
 		}
 	}
 
@@ -97,7 +127,8 @@ bool MainGameScene::Initialize() {
 void MainGameScene::ProcessInput()
 {
 	GLFWEW::Window& window = GLFWEW::Window::Instance();
-	///カメラ操作
+
+	//プレイヤー操作
 	const GamePad gamepad = window.GetGamePad();
 
 	glm::vec3 velocity(0);
@@ -114,9 +145,11 @@ void MainGameScene::ProcessInput()
 		velocity.z = -1;
 	}
 	if (velocity.x || velocity.z) {
-		velocity = normalize(velocity) * 20.0f;
+		velocity = normalize(velocity);
+		player->rotation.y = std::atan2(-velocity.z, velocity.x) + glm::radians(90.0f);
+		velocity *= 6.0f;
 	}
-	camera.velocity = velocity;
+	player->velocity = velocity;
 	
 
 	
@@ -147,16 +180,22 @@ void MainGameScene::Update(float deltaTime) {
 	GLFWEW::Window& window = GLFWEW::Window::Instance();
 
 	//カメラの状態を更新
-	if (dot(camera.velocity, camera.velocity)) {
-		camera.target += camera.velocity * deltaTime;
-		camera.target.y = heightMap.Height(camera.target);
-		camera.position = camera.target + glm::vec3(0, 50, 50);
+	{
+		camera.target = player->position;
+		camera.position = camera.target + glm::vec3(0, 30, 30);
 	}
 	player->Update(deltaTime);
 	enemies.Update(deltaTime);
+	trees.Update(deltaTime);
+
+	player->position.y = heightMap.Height(player->position);
+	DetectCollision(player, enemies, PlayerCollisionHandler);
+	DetectCollision(player, trees, PlayerCollisionHandler);
+	player->position.y = heightMap.Height(player->position);
 
 	player->UpdateDrawData(deltaTime);
 	enemies.UpdateDrawData(deltaTime);
+	trees.UpdateDrawData(deltaTime);
 
 	const float w = window.Width();
 	const float h = window.Height();
