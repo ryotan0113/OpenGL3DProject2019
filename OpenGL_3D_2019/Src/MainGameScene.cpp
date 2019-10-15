@@ -18,21 +18,34 @@
 */
 void PlayerCollisionHandler(const ActorPtr& a, const ActorPtr& b, const glm::vec3& p)
 {
-	const glm::vec3 v = a->colWorld.center - p;
+	const glm::vec3 v = a->colWorld.s.center - p;
 	//衝突位置との距離が近づきすぎないか調べる
 	if (dot(v, v) > FLT_EPSILON) {
 		//aをbに重ならない位置まで移動
 		const glm::vec3 vn = normalize(v);
-		const float radiusSum = a->colWorld.r + b->colWorld.r;
+		float radiusSum = a->colWorld.s.r;
+		switch (b->colWorld.type)
+		{
+		case Collision::Shape::Type::sphere:
+			radiusSum += b->colWorld.s.r;
+			break;
+
+		case Collision::Shape::Type::capsule:
+			radiusSum += b->colWorld.c.r;
+			break;
+		}
 		const float distance = radiusSum - glm::length(v) + 0.01f;
 		a->position += vn * distance;
-		a->colWorld.center += vn * distance;
+		a->colWorld.s.center += vn * distance;
+		if (a->velocity.y < 0 && vn.y >= glm::cos(glm::radians(60.0f))) {
+			a->velocity.y = 0;
+		}
 	}else {
 		//移動を取り消す(距離が近すぎる場合の例外処理)
 		const float deltaTime = static_cast<float>(GLFWEW::Window::Instance().DeltaTime());
 		const glm::vec3 deltaVelocity = a->velocity * deltaTime;
 		a->position -= deltaVelocity;
-		a->colWorld.center -= deltaVelocity;
+		a->colWorld.s.center -= deltaVelocity;
 	}
 }
 
@@ -54,6 +67,7 @@ bool MainGameScene::Initialize() {
 	meshBuffer.LoadMesh("Res/red_pine_tree.gltf");
 	meshBuffer.LoadMesh("Res/bikuni.gltf");
 	meshBuffer.LoadMesh("Res/oni_small.gltf");
+	meshBuffer.LoadMesh("Res/wall_stone.gltf");
 
 	//ハイトマップを作成する
 	if (!heightMap.LoadFromFile("Res/Terrain.tga", 20.0f, 0.5f)) {
@@ -65,12 +79,23 @@ bool MainGameScene::Initialize() {
 
 	glm::vec3 startPos(100, 0, 100);
 	startPos.y = heightMap.Height(startPos);
-	player = std::make_shared<StaticMeshActor>(
-		meshBuffer.GetFile("Res/bikuni.gltf"), "Player", 20, startPos);
-	player->colLocal = Collision::Sphere{ glm::vec3(0),0.5f };
+	player = std::make_shared<PlayerActor>(
+		meshBuffer.GetFile("Res/bikuni.gltf"), startPos, glm::vec3(0), &heightMap);
 
 	std::mt19937 rand;
 	rand.seed(0);
+
+	//石壁を配置
+	{
+		const Mesh::FilePtr meshStoneWall = meshBuffer.GetFile("Res/wall_stone.gltf");
+		glm::vec3 position = startPos + glm::vec3(3, 0, 3);
+		position.y = heightMap.Height(position);
+		StaticMeshActorPtr p = std::make_shared<StaticMeshActor>(
+			meshStoneWall, "StoneWall", 100, position, glm::vec3(0, 0.5f, 0));
+		p->colLocal = Collision::CreateOBB(glm::vec3(0, 0, 0),
+			glm::vec3(1, 0, 0), glm::vec3(0, 1, 0), glm::vec3(0, 0, -1), glm::vec3(2, 2, 0.5f));
+		objects.Add(p);
+	}
 
 	//敵を配置
 	{
@@ -88,30 +113,28 @@ bool MainGameScene::Initialize() {
 			rotation.y = std::uniform_real_distribution<float>(0, 6.3f)(rand);
 			StaticMeshActorPtr p = std::make_shared<StaticMeshActor>(
 				mesh, "Kooni", 13, position, rotation);
-			p->colLocal = Collision::Sphere{ glm::vec3(0), 1.0f };
+			p->colLocal = Collision::CreateCapsule(glm::vec3(0, 0.5f, 0), glm::vec3(0, 1, 0), 0.5f);
 			enemies.Add(p);
 		}
 	}
 
-	std::mt19937 treesrand;
-	treesrand.seed(0);
 	//木を配置
 	{
-		const size_t treeCount = 1000;
+		const size_t treeCount = 100;
 		trees.Reserve(treeCount);
 		const Mesh::FilePtr mesh = meshBuffer.GetFile("Res/red_pine_tree.gltf");
 		for (size_t i = 0; i < treeCount; ++i) {
 			//木の位置を(80,80)-(180,180)の範囲からランダムに選択
 			glm::vec3 position(0);
-			position.x = std::uniform_real_distribution<float>(40, 140)(treesrand);
-			position.z = std::uniform_real_distribution<float>(40, 140)(treesrand);
+			position.x = std::uniform_real_distribution<float>(40, 140)(rand);
+			position.z = std::uniform_real_distribution<float>(40, 140)(rand);
 			position.y = heightMap.Height(position);
 			//木の向きをランダムに選択
 			glm::vec3 rotation(0);
-			rotation.y = std::uniform_real_distribution<float>(0, 6.3f)(treesrand);
+			rotation.y = std::uniform_real_distribution<float>(0, 6.3f)(rand);
 			StaticMeshActorPtr t = std::make_shared<StaticMeshActor>(
 				mesh, "Tree", 13, position, rotation);
-			t->colLocal = Collision::Sphere{ glm::vec3(0), 1.0f };
+			t->colLocal = Collision::CreateCapsule(glm::vec3(0, 0, 0), glm::vec3(0, 3, 0),0.3f);
 			trees.Add(t);
 		}
 	}
@@ -149,7 +172,13 @@ void MainGameScene::ProcessInput()
 		player->rotation.y = std::atan2(-velocity.z, velocity.x) + glm::radians(90.0f);
 		velocity *= 6.0f;
 	}
-	player->velocity = velocity;
+	player->velocity.x = velocity.x;
+	player->velocity.z = velocity.z;
+
+	//ジャンプ
+	if (gamepad.buttonDown & GamePad::B) {
+		player->Jump();
+	}
 	
 
 	
@@ -187,15 +216,16 @@ void MainGameScene::Update(float deltaTime) {
 	player->Update(deltaTime);
 	enemies.Update(deltaTime);
 	trees.Update(deltaTime);
+	objects.Update(deltaTime);
 
-	player->position.y = heightMap.Height(player->position);
 	DetectCollision(player, enemies, PlayerCollisionHandler);
 	DetectCollision(player, trees, PlayerCollisionHandler);
-	player->position.y = heightMap.Height(player->position);
+	DetectCollision(player, objects, PlayerCollisionHandler);
 
 	player->UpdateDrawData(deltaTime);
 	enemies.UpdateDrawData(deltaTime);
 	trees.UpdateDrawData(deltaTime);
+	objects.UpdateDrawData(deltaTime);
 
 	const float w = window.Width();
 	const float h = window.Height();
@@ -228,4 +258,5 @@ void MainGameScene::Render() {
 	player->Draw();
 	enemies.Draw();
 	trees.Draw();
+	objects.Draw();
 }
