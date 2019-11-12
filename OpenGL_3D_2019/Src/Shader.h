@@ -86,6 +86,9 @@ public:
   void SetModelMatrix(const glm::mat4&);
   //void Draw(const Mesh&, const glm::vec3& t, const glm::vec3& r, const glm::vec3& s);
 
+  ///プログラムIDを取得する
+  GLuint Get() const { return id; }
+
 private:
   GLuint id = 0; // プログラムID.
 

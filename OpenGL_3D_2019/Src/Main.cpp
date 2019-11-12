@@ -3,6 +3,7 @@
 * @file Main.cpp
 */
 #include "TitleScene.h"
+#include "SkeletalMesh.h"
 #include "GLFWEW.h"
 #include <Windows.h>
 #include <iostream>
@@ -12,6 +13,8 @@ int main()
 	if (!window.Init(800, 600, "Title")) {
 		return 1;
 	}
+	//スケルタルメッシュ・アニメーションを利用可能にする
+	Mesh::SkeletalAnimation::Initialize();
 
 	SceneStack& sceneStack = SceneStack::Instance();
 	sceneStack.Push(std::make_shared<TitleScene>());
@@ -22,12 +25,11 @@ int main()
 
 		window.Update();
 
-		sceneStack.Update(deltaTime);
-
-		//const float deltaTime = 1.0f / 60.0f;
 
 
-		/**
+
+
+		/*
 		//ESCキーが押されたら終了ウィンドウを表示
 		if (window.IsKeyPressed(GLFW_KEY_ESCAPE)) {
 			if (MessageBox(nullptr, "ゲームを終了しますか？", "終了", MB_OKCANCEL) == IDOK) {
@@ -36,8 +38,13 @@ int main()
 		}
 		*/
 		
+		//スケルタルメッシュ・アニメーションデータ用データの作成準備
+		Mesh::SkeletalAnimation::ResetUniformData();
 
+		sceneStack.Update(deltaTime);
 
+		//スケルタルメッシュ・アニメーション用データをGPUメモリに転送
+		Mesh::SkeletalAnimation::UploadUniformData();
 
 		//バックバッファを消去する
 		glClearColor(0.8f, 0.2f, 0.1f, 1.0f);
@@ -52,5 +59,7 @@ int main()
 		window.SwapBuffers();
 	}
 
+	//スケルタルメッシュ・アニメーションの利用を終了する
+	Mesh::SkeletalAnimation::Finalize();
 	
 }

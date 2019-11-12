@@ -11,7 +11,7 @@
 *
 * @param tex スプライトとして表示するテクスチャー
 */
-Sprite::Sprite(const Texture::Image2Dptr& tex) :
+Sprite::Sprite(const Texture::Image2DPtr& tex) :
 	texture(tex), 
 	rect(Rect{ glm::vec2(),glm::vec2(tex->Width(),tex->Height())})
 {
@@ -23,7 +23,7 @@ Sprite::Sprite(const Texture::Image2Dptr& tex) :
 *
 * @param tex 描画に使用するテクスチャ
 */
-void Sprite::Texture(const Texture::Image2Dptr& tex)
+void Sprite::Texture(const Texture::Image2DPtr& tex)
 {
 	texture = tex;
 	Rectangle(Rect{ glm::vec2(0),glm::vec2(tex->Width(),tex->Height()) });
@@ -99,7 +99,7 @@ bool SpriteRenderer::AddVertices(const Sprite& sprite)
 		return false;
 	}
 	
-	const Texture::Image2Dptr& texture = sprite.Texture();
+	const Texture::Image2DPtr& texture = sprite.Texture();
 	const glm::vec2 reciprocalSize(glm::vec2(1) / glm::vec2(texture->Width(), texture->Height()));
 
 	//矩形を0.0～1.0の範囲に変換

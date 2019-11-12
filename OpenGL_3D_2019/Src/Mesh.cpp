@@ -3,6 +3,7 @@
 */
 #define NOMINMAX
 #include "Mesh.h"
+#include "SkeletalMesh.h"
 #include "json11/json11.hpp"
 #include <glm/gtc/quaternion.hpp>
 #include <fstream>
@@ -185,6 +186,14 @@ namespace Mesh
 			return false;
 		}
 
+		//スケルタルメッシュ用のシェーダーを読み込む
+		progSkeletalMesh = Shader::Program::Create(
+			"Res/SkeletalMesh.vert", "Res/SkeletalMesh.frag");
+		if (progSkeletalMesh->IsNull()) {
+			return false;
+		}
+		SkeletalAnimation::BindUniformBlock(progSkeletalMesh);
+
 		vboEnd = 0;
 		iboEnd = 0;
 		files.reserve(100);
@@ -276,12 +285,13 @@ namespace Mesh
 	* @return 作成したMaterial構造体
 	*/
 	Material Buffer::CreateMaterial(
-		const glm::vec4& color, Texture::Image2Dptr texture)const
+		const glm::vec4& color, Texture::Image2DPtr texture)const
 	{
 		Material m;
 		m.baseColor = color;
 		m.texture = texture;
 		m.program = progStaticMesh;
+		m.progSkeletalMesh = progSkeletalMesh;
 		return m;
 	}
 
@@ -481,7 +491,7 @@ namespace Mesh
 						col[i] = static_cast<float>(baseColorFactor[i].number_value());
 					}
 				}
-				Texture::Image2Dptr tex;
+				Texture::Image2DPtr tex;
 				if (!texturePath.empty()) {
 					tex = Texture::Image2D::Create(texturePath.c_str());
 				}
@@ -585,6 +595,8 @@ namespace Mesh
 	{
 		progStaticMesh->Use();
 		progStaticMesh->SetViewProjectionMatrix(matVP);
+		progSkeletalMesh->Use();
+		progSkeletalMesh->SetViewProjectionMatrix(matVP);
 		glUseProgram(0);
 	}
 

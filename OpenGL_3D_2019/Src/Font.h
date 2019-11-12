@@ -32,7 +32,7 @@ public:
 
 private:
 	SpriteRenderer spriteRenderer;	///<描画に使用するスプライトレンダラー
-	std::vector<Texture::Image2Dptr> textures;	///<フォントテクスチャリスト
+	std::vector<Texture::Image2DPtr> textures;	///<フォントテクスチャリスト
 	float lineHeight = 0;			///<行の高さ
 	float base = 0;					///<行の上部からベースラインまでの距離
 

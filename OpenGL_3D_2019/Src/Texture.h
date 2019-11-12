@@ -11,7 +11,7 @@
 namespace Texture {
 
 	class Image2D;
-	using Image2Dptr = std::shared_ptr<Image2D>;
+	using Image2DPtr = std::shared_ptr<Image2D>;
 
 	/**
 	* ‰æ‘œƒf[ƒ^
@@ -39,7 +39,7 @@ bool LoadImage2D(const char* path, ImageData* imageData);
 class Image2D
 {
 public:
-	static Image2Dptr Create(const char*);
+	static Image2DPtr Create(const char*);
   Image2D() = default;
   explicit Image2D(GLuint texId);
   ~Image2D();

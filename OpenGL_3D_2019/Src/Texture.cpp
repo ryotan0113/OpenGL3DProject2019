@@ -278,7 +278,7 @@ GLuint Image2D::Get() const
 *
 * @return 作成したテクスチャオブジェクト
 */
-Image2Dptr Image2D::Create(const char* path)
+Image2DPtr Image2D::Create(const char* path)
 {
 	return std::make_shared<Image2D>(LoadImage2D(path));
 }

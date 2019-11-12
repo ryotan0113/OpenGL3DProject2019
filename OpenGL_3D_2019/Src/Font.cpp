@@ -123,7 +123,7 @@ bool FontRenderer::LoadFromFile(const char* filename)
 	textures.clear();
 	textures.reserve(texNameList.size());
 	for (const std::string& e : texNameList) {
-		Texture::Image2Dptr tex = Texture::Image2D::Create(e.c_str());
+		Texture::Image2DPtr tex = Texture::Image2D::Create(e.c_str());
 		if (!tex) {
 			return false;
 		}

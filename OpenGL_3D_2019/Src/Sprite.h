@@ -25,7 +25,7 @@ class Sprite
 {
 public:
 	Sprite() = default;
-	explicit Sprite(const Texture::Image2Dptr&);
+	explicit Sprite(const Texture::Image2DPtr&);
 	~Sprite() = default;
 	Sprite(const Sprite&) = default;
 	Sprite& operator=(const Sprite&) = default;
@@ -51,8 +51,8 @@ public:
 	const Rect& Rectangle() const { return rect; }
 
 	//テクスチャの設定・取得
-	void Texture(const Texture::Image2Dptr& tex);
-	const Texture::Image2Dptr& Texture() const { return texture; }
+	void Texture(const Texture::Image2DPtr& tex);
+	const Texture::Image2DPtr& Texture() const { return texture; }
 
 private:
 	glm::vec3 position = glm::vec3(0);
@@ -60,7 +60,7 @@ private:
 	glm::vec2 scale = glm::vec2(1);
 	glm::vec4 color = glm::vec4(1);
 	Rect rect = { glm::vec2(0,0),glm::vec2(1,1) };
-	Texture::Image2Dptr texture;
+	Texture::Image2DPtr texture;
 };
 
 /**
@@ -97,7 +97,7 @@ private:
 	struct Primitive {
 		size_t count;
 		size_t offset;
-		Texture::Image2Dptr texture;
+		Texture::Image2DPtr texture;
 	};
 	std::vector<Primitive> primitives;
 };
